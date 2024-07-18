@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "782564856937",
+    "project_id": "chata2024",
+    "storage_bucket": "chata2024.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:782564856937:android:e21116b4bcd850e1b1fef8",
+        "android_client_info": {
+          "package_name": "com.example.chata"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKGKY18oaTw7dzhB68A9TrAzegq0MF7iA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
