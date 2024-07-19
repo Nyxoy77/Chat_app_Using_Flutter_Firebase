@@ -1,5 +1,7 @@
 import 'package:chata/const.dart';
+import 'package:chata/services/alert_services.dart';
 import 'package:chata/services/auth_service.dart';
+import 'package:chata/services/navigation_service.dart';
 import 'package:chata/widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -12,21 +14,23 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final GetIt _getIt = GetIt.instance;
 
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
   // final AuthService _authService = AuthService(); //
   late final AuthService _authService;
+  late final NavigationService _navigationService;
+  late final AlertServices _alertServices;
 
   String? email, password;
-  
+
   @override
   void initState() {
     super.initState();
-    _authService = _getIt.get<AuthService>(); // same state throughout!
+    _authService = _getIt.get<AuthService>();
+    _navigationService = _getIt.get<NavigationService>();
+    _alertServices = _getIt.get<AlertServices>(); // same state throughout!
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -116,17 +120,16 @@ class _LoginPageState extends State<LoginPage> {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
-        onPressed: () async  {
+        onPressed: () async {
           if (_loginFormKey.currentState?.validate() ?? false) {
             _loginFormKey.currentState?.save();
             bool result = await _authService.login(email!, password!);
-            if(result)
-            {
-           print(result);
-            }else{
-
+            if (result) {
+              _alertServices.showToast(text: "Login Successful!");
+              _navigationService.pushReplacementNamed("/home");
+            } else {
+              _alertServices.showToast(text: "Failed to loging . Please try again ",icon: Icons.error);
             }
- 
           }
         },
         child: const Text("Submit"),
