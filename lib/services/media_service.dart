@@ -1,12 +1,17 @@
- import 'dart:io';
+import 'dart:io';
+
 
 import 'package:image_picker/image_picker.dart';
 
-class MediaService{
+class MediaService {
   final ImagePicker _picker = ImagePicker();
-  MediaService(){}
+  MediaService() {}
 
-  Future<File?> getImage() async{
-  final XFile? _file = await _picker.pickImage(source: ImageSource.gallery);
+  Future<File?> getImage() async {
+    final XFile? _file = await _picker.pickImage(source: ImageSource.gallery);
+    if (_file != null) {
+      return File(_file.path);
+    }
+    return null;
   }
- }
+}

@@ -1,10 +1,14 @@
 import 'dart:io';
-
 import 'package:chata/const.dart';
+import 'package:chata/services/alert_services.dart';
+import 'package:chata/services/auth_service.dart';
+import 'package:chata/services/media_service.dart';
+import 'package:chata/services/navigation_service.dart';
+import 'package:chata/services/storage_service.dart';
 import 'package:chata/widgets/custom_form_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:image_picker/image_picker.dart';
+
+import 'package:get_it/get_it.dart';
 
 class RegisterationPage extends StatefulWidget {
   const RegisterationPage({super.key});
@@ -14,13 +18,30 @@ class RegisterationPage extends StatefulWidget {
 }
 
 class _RegisterationPageState extends State<RegisterationPage> {
-  final GlobalKey _loginFormKey = GlobalKey<FormState>();
-  String? name , email , password;
+  final GlobalKey<FormState> _registerFormKey = GlobalKey();
+  final GetIt _getIt = GetIt.instance;
+  late final MediaService _mediaService;
+  late final NavigationService _navigationService;
+  late final AuthService _authService;
+  late final AlertServices _alertServices;
+  late final StorageService _storageService;
+  String? name, email, password;
   File? selectedImage;
+  bool isLoading = false;
+  @override
+  void initState() {
+    super.initState();
+    _storageService = _getIt.get<StorageService>();
+    _alertServices = _getIt.get<AlertServices>();
+    _mediaService = _getIt.get<MediaService>();
+    _navigationService = _getIt.get<NavigationService>();
+    _authService = _getIt.get<AuthService>();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: _buildUi(),
     );
   }
@@ -29,16 +50,24 @@ class _RegisterationPageState extends State<RegisterationPage> {
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-        child: Column(children: [
-          _headerUi(),
-          _registerForm(),
-          _loginButton(),
-        ],),
+        child: Column(
+          children: [
+            _headerUi(),
+            if (isLoading == false) _registerForm(),
+            if (isLoading == false) _loginAccountLink(),
+            if (isLoading)
+              Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
+          ],
+        ),
       ),
     );
   }
 
-   Widget _headerUi() {
+  Widget _headerUi() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: const Column(
@@ -60,14 +89,14 @@ class _RegisterationPageState extends State<RegisterationPage> {
     );
   }
 
-   Widget _registerForm() {
+  Widget _registerForm() {
     return Container(
-      height: MediaQuery.sizeOf(context).height * 0.40,
+      height: MediaQuery.sizeOf(context).height * 0.60,
       margin: EdgeInsets.symmetric(
-        vertical: MediaQuery.sizeOf(context).height * 0.05,
+        vertical: MediaQuery.sizeOf(context).height * 0.04,
       ),
       child: Form(
-        key: _loginFormKey,
+        key: _registerFormKey,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Column(
@@ -76,10 +105,21 @@ class _RegisterationPageState extends State<RegisterationPage> {
             mainAxisSize: MainAxisSize.max,
             children: [
               _pfpSelectionField(),
+              const SizedBox(height: 10),
+              CustomFormField(
+                validationRegEx: nameRegExp,
+                height: MediaQuery.sizeOf(context).height * 0.1,
+                hintText: "Name",
+                onSaved: (value) {
+                  setState(() {
+                    name = value;
+                  });
+                },
+              ),
               CustomFormField(
                 validationRegEx: emailRegExp,
                 height: MediaQuery.sizeOf(context).height * 0.1,
-                hintText: "Name",
+                hintText: "Email",
                 onSaved: (value) {
                   setState(() {
                     email = value;
@@ -87,17 +127,6 @@ class _RegisterationPageState extends State<RegisterationPage> {
                 },
               ),
               CustomFormField(
-                validationRegEx: passwordRegExp,
-                height: MediaQuery.sizeOf(context).height * 0.1,
-                hintText: "Email",
-                obscure: true,
-                onSaved: (value) {
-                  setState(() {
-                    password = value;
-                  });
-                },
-              ),
-               CustomFormField(
                 validationRegEx: passwordRegExp,
                 height: MediaQuery.sizeOf(context).height * 0.1,
                 hintText: "Password",
@@ -108,52 +137,91 @@ class _RegisterationPageState extends State<RegisterationPage> {
                   });
                 },
               ),
-             
+              _registerButton(),
             ],
           ),
         ),
       ),
     );
   }
-  Widget _pfpSelectionField(){
-   return GestureDetector(
-    onTap: ()async{
-      ImagePicker _imagePicker = ImagePicker();
-      XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
-      if(image!=null)
-      {
-        selectedImage = image as File?;
-      }
-    },
-     child: CircleAvatar(
-      radius: MediaQuery.sizeOf(context).width*0.15,
-      backgroundImage: selectedImage !=null ? FileImage(selectedImage!):NetworkImage(imageUrl) as ImageProvider,
-     
-     ),
-   );
+
+  Widget _pfpSelectionField() {
+    return GestureDetector(
+      onTap: () async {
+        File? file = await _mediaService.getImage();
+        if (file != null) {
+          setState(() {
+            selectedImage = file;
+          });
+        }
+      },
+      child: CircleAvatar(
+        radius: MediaQuery.sizeOf(context).width * 0.15,
+        backgroundImage: selectedImage != null
+            ? FileImage(selectedImage!)
+            : NetworkImage(imageUrl) as ImageProvider,
+      ),
+    );
   }
 
-   Widget _loginButton() {
+  Widget _registerButton() {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
         onPressed: () async {
-          // if (_loginFormKey.currentState?.validate() ?? false) {
-          //   _loginFormKey.currentState?.save();
-          //   bool result = await _authService.login(email!, password!);
-          //   if (result) {
-          //     _alertServices.showToast(text: "Login Successful!");
-          //     _navigationService.pushReplacementNamed("/home");
-          //   } else {
-          //     _alertServices.showToast(text: "Failed to loging . Please try again ",icon: Icons.error);
-          //   }
-          // }
+          // setState(() {
+          //   isLoading = false;
+          // });
+          try {
+            if ((_registerFormKey.currentState?.validate() ?? false) &&
+                selectedImage != null) {
+              _registerFormKey.currentState!.save();
+              final result =
+                  await _authService.signUp(email: email!, password: password!);
+              if (result) {
+                _alertServices.showToast(
+                    text: "Regisetered Successfully! Please Login ");
+                String pfpURL = await _storageService.uploadUserPfp(
+                    file: selectedImage!, uId: _authService.user!.uid);
+              }
+            } else {
+              _alertServices.showToast(
+                  text: "Could not register ,an error occured ");
+            }
+          } catch (e) {
+            print(e);
+          }
+          // setState(() {
+          //   isLoading = true ;
+          // });
         },
-        child: const Text("Submit"),
+        child: const Text(
+          "Register",
+          style: TextStyle(color: Colors.white),
+        ),
         color: Theme.of(context).colorScheme.primary,
       ),
     );
   }
 
-  
+  Widget _loginAccountLink() {
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const Text('Already have an account ?'),
+          GestureDetector(
+              onTap: () {
+                _navigationService.goBack();
+              },
+              child: const Text(
+                'Login',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ))
+        ],
+      ),
+    );
+  }
 }

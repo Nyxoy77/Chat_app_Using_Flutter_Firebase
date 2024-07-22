@@ -29,10 +29,23 @@ class AuthService {
     return false;
   }
 
+  Future<bool> signUp({required String email, required String password}) async {
+    try {
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      if (credential.user != null) {
+        return true;
+      }
+    } catch (e) {
+      print(e);
+    }
+    return false;
+  }
+
   Future<bool> logOut() async {
     try {
       await _firebaseAuth.signOut();
-      return true ;
+      return true;
     } catch (e) {
       print(e);
     }
