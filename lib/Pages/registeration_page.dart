@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:chata/const.dart';
+import 'package:chata/models/user_profile.dart';
 import 'package:chata/services/alert_services.dart';
 import 'package:chata/services/auth_service.dart';
+import 'package:chata/services/database_service.dart';
 import 'package:chata/services/media_service.dart';
 import 'package:chata/services/navigation_service.dart';
 import 'package:chata/services/storage_service.dart';
@@ -25,6 +27,7 @@ class _RegisterationPageState extends State<RegisterationPage> {
   late final AuthService _authService;
   late final AlertServices _alertServices;
   late final StorageService _storageService;
+  late final DatabaseService _databaseService;
   String? name, email, password;
   File? selectedImage;
   bool isLoading = false;
@@ -36,6 +39,7 @@ class _RegisterationPageState extends State<RegisterationPage> {
     _mediaService = _getIt.get<MediaService>();
     _navigationService = _getIt.get<NavigationService>();
     _authService = _getIt.get<AuthService>();
+    _databaseService = _getIt.get<DatabaseService>();
   }
 
   @override
@@ -169,9 +173,9 @@ class _RegisterationPageState extends State<RegisterationPage> {
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
         onPressed: () async {
-          // setState(() {
-          //   isLoading = false;
-          // });
+          setState(() {
+            isLoading = true;
+          });
           try {
             if ((_registerFormKey.currentState?.validate() ?? false) &&
                 selectedImage != null) {
@@ -180,20 +184,33 @@ class _RegisterationPageState extends State<RegisterationPage> {
                   await _authService.signUp(email: email!, password: password!);
               if (result) {
                 _alertServices.showToast(
-                    text: "Regisetered Successfully! Please Login ");
+                    text: "Regisetered Successfully!");
                 String pfpURL = await _storageService.uploadUserPfp(
                     file: selectedImage!, uId: _authService.user!.uid);
+                if (pfpURL != null) {
+                  await _databaseService.createUserProfile(
+                    userProfile: UserProfile(
+                        uid: _authService.user!.uid,
+                        name: name,
+                        pfpURL: pfpURL),
+                  );
+                  _navigationService.goBack();
+                  _navigationService.pushReplacementNamed("/home");
+                } else {
+                  throw Exception("Unable to upload the profile picture");
+                }
               }
             } else {
-              _alertServices.showToast(
-                  text: "Could not register ,an error occured ");
+              throw Exception("Unable to register the user");
             }
           } catch (e) {
+            _alertServices.showToast(
+                text: "Could not register ,an error occured ");
             print(e);
           }
-          // setState(() {
-          //   isLoading = true ;
-          // });
+          setState(() {
+            isLoading = true;
+          });
         },
         child: const Text(
           "Register",

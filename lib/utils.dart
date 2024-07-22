@@ -1,6 +1,7 @@
 import 'package:chata/firebase_options.dart';
 import 'package:chata/services/alert_services.dart';
 import 'package:chata/services/auth_service.dart';
+import 'package:chata/services/database_service.dart';
 import 'package:chata/services/media_service.dart';
 import 'package:chata/services/navigation_service.dart';
 import 'package:chata/services/storage_service.dart';
@@ -29,6 +30,9 @@ Future<void> registerServices() async {
   );
      getIt.registerSingleton<StorageService>(
     StorageService(),
+  );
+      getIt.registerSingleton<DatabaseService>(
+    DatabaseService(),
   );
   
 }
