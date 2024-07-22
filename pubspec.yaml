@@ -47,6 +47,7 @@ dependencies:
   delightful_toast: ^1.1.0
   path: ^1.9.0
   firebase_analytics: ^11.2.0
+  flutter_gemini: ^2.0.4
 
 dev_dependencies:
   flutter_test:

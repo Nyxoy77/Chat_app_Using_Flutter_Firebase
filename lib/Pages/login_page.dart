@@ -147,7 +147,9 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           const Text('Dont have an account ?  '),
           GestureDetector(
-              onTap: () {},
+              onTap: () {
+                _navigationService.pushNamed("/register");
+              },
               child: const Text(
                 'SignUp',
                 style: TextStyle(fontWeight: FontWeight.bold),

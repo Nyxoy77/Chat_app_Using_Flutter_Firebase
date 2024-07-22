@@ -1,6 +1,8 @@
 import 'package:chata/Pages/home_page.dart';
 import 'package:chata/Pages/login_page.dart';
+import 'package:chata/Pages/registeration_page.dart';
 import 'package:flutter/widgets.dart';
+import 'package:path/path.dart';
 
 class NavigationService {
   NavigationService() {
@@ -11,6 +13,7 @@ class NavigationService {
   final Map<String, Widget Function(BuildContext)> _routes = {
     "/login": (context) => LoginPage(),
     "/home" : (context) =>HomePage(),
+    "/register" : (context)=> RegisterationPage(),
   };
 
   GlobalKey<NavigatorState>? get navigatorKey {
