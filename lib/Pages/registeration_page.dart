@@ -183,8 +183,7 @@ class _RegisterationPageState extends State<RegisterationPage> {
               final result =
                   await _authService.signUp(email: email!, password: password!);
               if (result) {
-                _alertServices.showToast(
-                    text: "Regisetered Successfully!");
+                _alertServices.showToast(text: "Regisetered Successfully!");
                 String pfpURL = await _storageService.uploadUserPfp(
                     file: selectedImage!, uId: _authService.user!.uid);
                 if (pfpURL != null) {
@@ -197,19 +196,28 @@ class _RegisterationPageState extends State<RegisterationPage> {
                   _navigationService.goBack();
                   _navigationService.pushReplacementNamed("/home");
                 } else {
+                  // setState(() {
+                  //   isLoading = false;
+                  // });
                   throw Exception("Unable to upload the profile picture");
                 }
               }
             } else {
+              // setState(() {
+              //   isLoading = false;
+              // });
               throw Exception("Unable to register the user");
             }
           } catch (e) {
+            // setState(() {
+            //   isLoading = true;
+            // });
             _alertServices.showToast(
                 text: "Could not register ,an error occured ");
             print(e);
           }
           setState(() {
-            isLoading = true;
+            isLoading = false;
           });
         },
         child: const Text(

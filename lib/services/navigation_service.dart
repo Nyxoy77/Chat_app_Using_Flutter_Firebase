@@ -1,6 +1,7 @@
 import 'package:chata/Pages/home_page.dart';
 import 'package:chata/Pages/login_page.dart';
 import 'package:chata/Pages/registeration_page.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 
@@ -34,5 +35,9 @@ class NavigationService {
 
   void goBack() {
     _navigatorKey.currentState?.pop();
+  }
+
+  void push(MaterialPageRoute route){
+    _navigatorKey.currentState?.push(route);
   }
 }
