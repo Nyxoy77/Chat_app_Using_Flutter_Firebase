@@ -1,4 +1,5 @@
 import 'package:chata/models/chat.dart';
+import 'package:chata/models/messages.dart';
 import 'package:chata/models/user_profile.dart';
 import 'package:chata/services/auth_service.dart';
 import 'package:chata/utils.dart';
@@ -18,7 +19,6 @@ class DatabaseService {
     _setUpCollectionRefernces();
   }
 
-  
   void _setUpCollectionRefernces() {
     _userCollection =
         _firebaseFirestore.collection('users').withConverter<UserProfile>(
@@ -60,5 +60,24 @@ class DatabaseService {
     final docRef = _chatCollection!.doc(chatID);
     final chat = Chat(id: chatID, participants: [uid1, uid2], messages: []);
     await docRef.set(chat);
+  }
+
+  Future<void> sendChatMessage(
+      {required uid1, required String uid2, required Message message}) async {
+    String chatID = generateChatID(uid1: uid1, uid2: uid2);
+    final docRef = _chatCollection!.doc(chatID);
+    await docRef.update({
+      "messages": FieldValue.arrayUnion(
+        [
+          message.toJson(),
+        ],
+      ),
+    });
+  }
+
+  Stream<DocumentSnapshot<Chat>> getChatMessages(String uid1, String uid2) {
+    String chatID = generateChatID(uid1: uid1, uid2: uid2);
+    return _chatCollection!.doc(chatID).snapshots()
+        as Stream<DocumentSnapshot<Chat>>;
   }
 }
