@@ -1,6 +1,3 @@
-Sure, here is an enhanced README file with additional details:
-
----
 
 # Flutter Chat Application
 
