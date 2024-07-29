@@ -12,9 +12,6 @@ This is a feature-rich chat application developed using Flutter. The app leverag
 - **Dependency Injection**: Utilized `get_it` for dependency injection, making the app's architecture clean and scalable.
 - **Chat UI**: Enhanced user experience using `dashchat` for an intuitive and responsive chat interface.
 - **Media Messages**: Users can send and receive images, enriching the communication experience.
-- **User Status**: Displays online/offline status of users.
-- **Message Read Receipts**: Indicate when messages have been read by the recipient.
-
 ## Screenshots
 
 
